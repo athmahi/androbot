@@ -104,10 +104,11 @@ UART uart;
 void reset_bot();
 void Decode_uart();
 void accelerometer_mode();
-
+void obstacle_detection_mode();
+int calculate_heading(int heading,int turn);
 u8 obstacle[10];
-
-
+u8 heading[5];
+u8 count = 0;
 int main(void)
 {
 
@@ -131,7 +132,10 @@ int main(void)
 	data[0] = 1;
 
 	//datarcv[0] = 1;
-	obstacle[0] = 55;
+
+	reset_bot();
+	heading[0] = uart.headding;
+
 	while(1)
 	{
 		int rcv = XUartLite_Recv(&UartLite,datarcv,1);
@@ -156,7 +160,7 @@ int main(void)
 			else if(uart.mode_operation == 2)
 			{
 				xil_printf("in obstacle detection mode\n\n");
-				//obstacle_detection_mode();
+				obstacle_detection_mode();
 			}
 		}
 
@@ -221,21 +225,30 @@ void accelerometer_mode()
 		xil_printf("\nforward\n");
 		if(ir_input == 255)
 		{
-			obstacle[0] = 0;
+			obstacle[0] = 2;
 			PMOD_HB3_mWriteReg(PMODHB3_0_BASEADDR, 4, 1);
 			PMOD_HB3_mWriteReg(PMODHB3_0_BASEADDR, 12, fwd_speed);
 
 			PMOD_HB3_mWriteReg(PMODHB3_1_BASEADDR, 4, 1);
 			PMOD_HB3_mWriteReg(PMODHB3_1_BASEADDR, 12, fwd_speed);
-			int a = XUartLite_Send(&UartLite, obstacle, 1);
+
+			/*if(count == 50)
+			{
+				int a = XUartLite_Send(&UartLite, obstacle, 1);
+				count = 0;
+			}*/
 		}
 
 		else
 		{
-			obstacle[0] = 55;
+			obstacle[0] = 5;
 			PMOD_HB3_mWriteReg(PMODHB3_0_BASEADDR, 12, stop_speed);
 			PMOD_HB3_mWriteReg(PMODHB3_1_BASEADDR, 12, stop_speed);
-			int a = XUartLite_Send(&UartLite, obstacle, 1);
+			/*if(count == 50)
+			{
+				int a = XUartLite_Send(&UartLite, obstacle, 1);
+				count = 0;
+			}*/
 			xil_printf("obstacle detected\n\n");
 		}
 
@@ -270,10 +283,117 @@ void accelerometer_mode()
 	default:
 		xil_printf("invalid entry\n\n");
 	}
+
+	//count++;
 }
 
 
+void obstacle_detection_mode()
+{
+	u8 direction = uart.direction_from_app;
+	u16 fwd_speed = 2000;
+	u16 bwd_speed = 2000;
+	u16 stop_speed = 0;
+	u16 turn_speed = 1500;
+	u16 ir_input = 0;
+	u8	ir_front = 0;
+	u8	ir_right = 0;
+	u8	ir_left	 = 0;
 
+
+	ir_input = XGpio_DiscreteRead(&GPIOInst0, GPIO_0_INPUT_0_CHANNEL);
+
+	ir_front = (ir_input & 0x1);
+
+	ir_right = (ir_input & 0x0002)>>1;
+
+	ir_left	 = (ir_input & 0x0004)>>2;
+
+	xil_printf(" %d		%d		%d \n\n", ir_front, ir_right, ir_left);
+
+	if(ir_front)
+	{
+		//move forward
+		PMOD_HB3_mWriteReg(PMODHB3_0_BASEADDR, 4, 1);
+		PMOD_HB3_mWriteReg(PMODHB3_0_BASEADDR, 12, fwd_speed);
+
+		PMOD_HB3_mWriteReg(PMODHB3_1_BASEADDR, 4, 1);
+		PMOD_HB3_mWriteReg(PMODHB3_1_BASEADDR, 12, fwd_speed);
+
+		uart.prev_heading = uart.headding;
+	}
+
+	else
+	{
+		if(ir_right)
+		{
+			//turn right
+			uart.headding = calculate_heading(uart.prev_heading, 1);
+
+		}
+
+		if(ir_right == 0 && ir_left == 1)
+		{
+			//turn left
+			uart.headding = calculate_heading(uart.prev_heading, 2);
+		}
+
+		if(ir_right == 0 && ir_left == 0)
+		{
+			//stop
+			xil_printf("**********************************************************\n\n");
+		}
+	}
+
+	xil_printf(" 				heading -	%d\n\n	", uart.headding);
+	heading[0] = uart.headding;
+
+	if(count >= 100)
+	{
+		int a = XUartLite_Send(&UartLite, heading, 1);
+		count = 0;
+	}
+	count++;
+
+}
+
+int calculate_heading(int current_heading, int turn)
+{
+	int new_heading;
+	int i;
+	if(turn == 1)										// if turn is right
+	{
+		if(current_heading == 1)						// if heading is east
+			new_heading = 4;							// new heading is south
+		else if(current_heading == 2)					// if heading is north
+			new_heading = 1;							// new heading is east
+		else if(current_heading == 3)					// if heading is west
+			new_heading = 2;							// new heading is north
+		else if(current_heading == 4)					// if heading is south
+			new_heading = 3;							// new heading is west
+		else
+			xil_printf("incorrect_orientation\n\n");
+	}
+
+	else if(turn == 2)									// if turn is left
+	{
+		if(current_heading == 1)						// if heading is east
+			new_heading = 2;							// new heading is north
+		else if(current_heading == 2)					// if heading is north
+			new_heading = 3;							// new heading is west
+		else if(current_heading == 3)					// if heading is west
+			new_heading = 4;							// new heading is south
+		else if(current_heading == 4)					// if heading is south
+			new_heading = 1;							// new heading is east
+		else
+			xil_printf("incorrect_orientation\n\n");
+	}
+
+	for(i = 0; i<10000; i++);
+	for(i = 0; i<10000; i++);
+	return new_heading;
+
+}
 
 int	 do_init(void)
 {
@@ -368,7 +488,6 @@ int AXI_Timer1_initialize(void){
 	XTmrCtr_Enable(AXI_TIMER1_BASEADDR, TmrCtrNumber1);
 	return XST_SUCCESS;
 }*/
-
 
 
 
