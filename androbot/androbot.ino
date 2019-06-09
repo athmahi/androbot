@@ -23,8 +23,8 @@
 // Set these to run example.
 #define FIREBASE_HOST "androbot-1f671.firebaseio.com"
 #define FIREBASE_AUTH "hUsGMLUDD7cdrMuCYVBca4ENHzzu0bS8gwxybMqn"
-#define WIFI_SSID "Last8digitsofpi"
-#define WIFI_PASSWORD "13243546"
+#define WIFI_SSID "PMK"
+#define WIFI_PASSWORD "prasanna"
 
 void setup() {
   Serial.begin(115200);
@@ -48,7 +48,8 @@ unsigned int byte_sent = 0;
 
 unsigned char byte_recv = 0;
 
-int n = 0, x = 0;
+unsigned int heading = 0;
+int n = 0, x = 0, y = 0;
 
 void loop() {
 
@@ -79,7 +80,42 @@ void loop() {
     Serial.begin(115200);
   }
 
-  Firebase.setInt("pointSet", (int)byte_recv);
+  heading = (int)byte_recv;
+
+  if(heading == 1)
+  {
+    x = Firebase.getInt("X");
+    x = x + 1;
+    Firebase.setInt("X", x);
+    Firebase.setInt("pointSet", 1);
+  }
+
+  if(heading == 2)
+  {
+    y = Firebase.getInt("Y");
+    y = y + 1;
+    Firebase.setInt("Y", y);
+    Firebase.setInt("pointSet", 1);
+  }
+
+  if(heading == 3)
+  {
+    x = Firebase.getInt("X");
+    x = x - 1;
+    Firebase.setInt("X", x);
+    Firebase.setInt("pointSet", 1);
+  }
+
+  if(heading == 4)
+  {
+    y = Firebase.getInt("Y");
+    y = y - 1;
+    Firebase.setInt("Y", y);
+    Firebase.setInt("pointSet", 1);
+  }
+  
+  
+  Firebase.setInt("pointSet", 0);
   Serial.flush();
   delay(100);
   
