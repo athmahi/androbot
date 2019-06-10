@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1083273649833",
+    "firebase_url": "https://androbot-1f671.firebaseio.com",
+    "project_id": "androbot-1f671",
+    "storage_bucket": "androbot-1f671.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1083273649833:android:50990f97041c3a21",
+        "android_client_info": {
+          "package_name": "edu.pdx.rsurya07.accelerometer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1083273649833-hnft62uco998l9rapvnttsadms1v0d82.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZ4hhgsr_WxzBQae7IwNzbAjhO6msKERw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1083273649833-hnft62uco998l9rapvnttsadms1v0d82.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
