@@ -25,6 +25,12 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
 
+/**
+ * @author Surya Ravikumar
+ *
+ * Activity that displays all the images found in external storage in a RecyclerView and
+ * starts an new activity when one of the images in the RecyclerView is clicked on
+ */
 public class GalleryActivity extends AppCompatActivity implements onImageClickListener{
 
     private RecyclerView mRecyclerView;
@@ -32,31 +38,30 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
     private ArrayList<String> imageNames;
 
     private RecyclerView.LayoutManager mLayoutManager;
-    private RecyclerView.ViewHolder mViewHolder;
     private RecyclerView.Adapter mAdapter;
 
+    /**
+     * Method that reads all the images in the specified external storage folder into arrays
+     */
     private void readFiles()
     {
+        //get permission to read from external storage if permission not given
         if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            if (shouldShowRequestPermissionRationale(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                // Explain to the user why we need to read the contacts
-            }
 
             requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
         }
 
-        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString()+ "/ece558";
+        //get root directory
+        String root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).toString()+ "/AndroBot";
 
-        Log.d("My app", root);
         File myDir = new File(root);
         myDir.mkdirs();
+
+        //get all files
         Queue<File> files = new LinkedList<>();
         files.addAll(Arrays.asList(myDir.listFiles()));
 
-        for(int i = 0; i < files.size(); i++)
-            Log.i("FILES: ", ((LinkedList<File>) files).get(i).toString());
-
+        //bitmap and string arrays
         images = new ArrayList<>();
         imageNames = new ArrayList<>();
 
@@ -65,19 +70,27 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
         Bitmap bitmap;
         String s;
 
+        //read image one by one
         for(int i = 0; i < files.size(); i++)
         {
-            s = ((LinkedList<File>) files).get(i).toString();
+            s = ((LinkedList<File>) files).get(i).toString();   //filename
 
-            bitmap = BitmapFactory.decodeFile(s, options);
+            bitmap = BitmapFactory.decodeFile(s, options);      //read file as image
+
+            //edit filename string so the path is removed and only the filename remains
             s = s.replace(root+"/", "");
             s = s.replace(".png", "");
-            imageNames.add(s);
 
+            //add image and name to arrays
+            imageNames.add(s);
             images.add(bitmap);
         }
     }
 
+    /**
+     * Method that retrieves and initializes widgets and view
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,8 +98,9 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
 
         readFiles();
 
+        //get view
         mRecyclerView = findViewById(R.id.recyclerView);
-        mLayoutManager = new GridLayoutManager(this, 3);
+        mLayoutManager = new GridLayoutManager(this, 3);    //a grid layout manager with 3 items per row
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -94,20 +108,31 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
         mRecyclerView.setAdapter(mAdapter);
     }
 
+    /**
+     * When an image is clicked, start a new activity after passing the image clicked on as extra
+     * @param position  index of image clicked on
+     */
     @Override
     public void onImageClick(int position) {
 
+        //get the image at index
         Bitmap b = images.get(position);
+
+        //convert it to a byte array
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         b.compress(Bitmap.CompressFormat.PNG, 100, stream);
         byte[] bytes = stream.toByteArray();
 
+        //pass image as extra and start activity
         Intent intent = new Intent(GalleryActivity.this, PhotoActivity.class);
         intent.putExtra("IMAGE", bytes);
         startActivity(intent);
 
     }
 
+    /**
+     * Class that defines the adapter
+     */
     private class RecyclerAdapter extends RecyclerView.Adapter<ImageViewHolder>
     {
 
@@ -122,6 +147,7 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
         @Override
         public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
+            //inflate the view
             View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.photo_layout, viewGroup, false);
             ImageViewHolder imageViewHolder = new ImageViewHolder(view, mOnImageClickListener);
 
@@ -131,6 +157,7 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
         @Override
         public void onBindViewHolder(@NonNull ImageViewHolder viewHolder, int i) {
 
+            //set image and name using index
             Bitmap bitmap = images.get(i);
             String title = imageNames.get(i);
 
@@ -141,10 +168,14 @@ public class GalleryActivity extends AppCompatActivity implements onImageClickLi
 
         @Override
         public int getItemCount() {
+            //return size of array
             return imageNames.size();
         }
     }
 
+    /**
+     * view holder class
+     */
     private class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         private ImageView image;

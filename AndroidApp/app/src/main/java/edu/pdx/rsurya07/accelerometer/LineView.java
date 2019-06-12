@@ -11,10 +11,16 @@ import android.view.View;
 
 import java.util.ArrayList;
 
+/**
+ * @author Surya Ravikumar
+ *
+ * Custom class that extends the View class. Includes methods to draw the path on screen
+ */
 public class LineView extends View {
-    private Paint paint = new Paint();
 
-    private ArrayList<PointF> pointA;
+
+    private Paint paint = new Paint();  //draw properties
+    private ArrayList<PointF> pointA;   //array to hold coordinates
 
     public LineView(Context context)
     {
@@ -34,29 +40,39 @@ public class LineView extends View {
     @Override
     protected void onDraw(Canvas canvas)
     {
-        paint.setColor(Color.RED);
+        paint.setColor(Color.RED);  //set draw color to red
 
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(10);   //set draw width
 
-
+        //draw lines between all the coordinates in the array
         for(int i = 0; i < pointA.size()-1; i++)
             canvas.drawLine(pointA.get(i).x, pointA.get(i).y, pointA.get(i+1).x, pointA.get(i+1).y, paint);
 
+        //draw circle to show starting points
         canvas.drawCircle(pointA.get(0).x, pointA.get(0).y, 15, paint);
 
+        //change color to blue
         paint.setColor(Color.BLUE);
 
+        //draw circle to denote current location of bot in blue
         if(pointA.size() > 1)
             canvas.drawCircle(pointA.get(pointA.size()-1).x, pointA.get(pointA.size()-1).y, 15, paint);
 
         super.onDraw(canvas);
     }
 
+    /**
+     * Method that sets the private variable with passed in coordinates
+     * @param point array that contains all coordinates
+     */
     public void setPointA(ArrayList<PointF> point)
     {
         pointA = point ;
     }
 
+    /**
+     * Method that invalidates the current layout and requests a new layout
+     */
     public void draw()
     {
         invalidate();
