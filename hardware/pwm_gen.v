@@ -1,45 +1,15 @@
 `timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
+// pwm_gen.v
 // 
-// Create Date: 05/15/2019 11:40:13 PM
-// Design Name: 
-// Module Name: pwm_gen
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
+// Created By:		Prasanna Kulkarni, Atharva Mahindrakar
+// Last Modified:	19-May-2019 (PK)
+//
+//
+// Description:
+// ------------
+// This is a simple pwm generation system used for 
+// Closed Loop PID control as part of the PMOD_HB3 IP
 
-
-`timescale 1ns / 1ps
-//////////////////////////////////////////////////////////////////////////////////
-// Company: 
-// Engineer: 
-// 
-// Create Date: 05/15/2019 10:24:00 PM
-// Design Name: 
-// Module Name: pwm_generator
-// Project Name: 
-// Target Devices: 
-// Tool Versions: 
-// Description: 
-// 
-// Dependencies: 
-// 
-// Revision:
-// Revision 0.01 - File Created
-// Additional Comments:
-// 
-//////////////////////////////////////////////////////////////////////////////////
 
 
 module pwm_generator(
@@ -48,16 +18,16 @@ module pwm_generator(
     input [10:0] pwm_count,
     output reg pwm
     );
-reg [10:0] pwm_counter;
+    reg [10:0] pwm_counter; // Counter used to count till a particular value
  
 always@(posedge clk )
 begin
     if (!rst) begin
-        pwm_counter <= 10'b0;
+        pwm_counter <= 10'b0; 
     end
     
     else begin
-       pwm_counter <= pwm_counter + 1; 
+       pwm_counter <= pwm_counter + 1;  // Incremented on every clock cycle
     end
 end
 
@@ -67,11 +37,11 @@ always @ (*) begin
   end
   else begin 
     if (pwm_counter <  pwm_count) begin
-        pwm = 1'b1;
+        pwm = 1'b1; // output pwm is given high when the counter is lower than the pwm count
     end
     
     else begin
-        pwm = 1'b0;
+        pwm = 1'b0; // ouput pwm zero otherwise
     end
 end
 end
