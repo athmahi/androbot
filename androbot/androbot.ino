@@ -59,14 +59,14 @@ void loop() {
 
   
   n = Firebase.getInt("botOn");                             // read the ON/OFF switch data fromfirebase
-  byte_sent = n * 100;
+  byte_sent = n * 100;                                      // multiply this data by 100
 
   n = Firebase.getInt("autoMode");                          // read the mode of operation
-  byte_sent = byte_sent + (n * 10);
+  byte_sent = byte_sent + (n * 10);                         // multiply by 10 and add this to byte_sent 
 
   n = Firebase.getInt("directionfromApp");                  // read the direction from app
 
-  byte_sent = byte_sent + n;
+  byte_sent = byte_sent + n;                                // add this data to unit's place of data
 
   //Serial.print(" firebase data is - ");
   
